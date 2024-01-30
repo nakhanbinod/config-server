@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    consul:
+      port: 8500
+      host: localhost
+      discovery:
+        enabled: true
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        instance-id: ${spring.application.name}:${server.port}:${spring.cloud.client.ip-address}
+        prefer-ip-address: true
+        acl-token: 9362e627-de72-4834-b2b6-5f67565bb16c
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/**
+        - id: bucket-service
+          uri: lb://bucket-service
+          predicates:
+            - Path=/bucket/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification/**
+        - id: setting-service
+          uri: lb://setting-service
+          predicates:
+            - Path=/setting/**
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: ["health", "prometheus", "metrics"]
+  endpoint:
+    health:
+      show-details: ALWAYS
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+server:
+  port: 8000
